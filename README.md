@@ -32,6 +32,38 @@ A full-stack task management application with user authentication, built using N
 - **Axios** - HTTP client
 - **React Hook Form** - Form handling
 
+## Local development with Docker Compose
+
+Docker Compose runs MongoDB in a container. The backend and frontend continue to run locally.
+
+If you created a standalone `mongo-tareas` container earlier, remove that container before starting Compose. This does not remove its named data volume:
+
+```bash
+docker rm -f mongo-tareas
+```
+
+Start MongoDB from the project root:
+
+```bash
+docker compose up -d
+```
+
+The backend connects to `mongodb://localhost:27017/merndb`. Start it in another terminal:
+
+```bash
+npm install
+npm run dev
+```
+
+Start the frontend in a separate terminal:
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+Stop MongoDB with `docker compose down`. Its data is kept in the `mongo-tareas-data` volume.
 
 ## API Endpoints
 
@@ -73,6 +105,7 @@ nodejs-react-mongo/
 │   ├── config.js
 │   ├── db.js
 │   └── index.js
+├── compose.yaml            # Local MongoDB container
 ├── package.json
 └── README.md
 ```
