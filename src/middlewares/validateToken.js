@@ -12,6 +12,6 @@ export const authRequired = (req, res, next) => {
       return res.status(401).json({ message: "Invalid token" });
     }
     req.user = user;
+    next();
   });
-  next();
 };
