@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { registerRequest } from "../api/auth";
 
@@ -8,9 +9,22 @@ function RegisterPage() {
     formState: { errors },
   } = useForm({ mode: "onTouched" });
 
+  const [formResponse, setFormResponse] = useState(null);
+
   const onSubmit = handleSubmit(async (values) => {
-    const res = await registerRequest(values);
-    console.log(res);
+    try {
+      const res = await registerRequest(values);
+      setFormResponse({ success: true, message: res.data.message });
+    } catch (error) {
+      console.log("error", error);
+      setFormResponse({
+        success: false,
+        message:
+          error.response?.data?.message ??
+          error.response?.data?.error ??
+          "No se pudo completar el registro. Intentá de nuevo.",
+      });
+    }
   });
 
   return (
@@ -69,6 +83,16 @@ function RegisterPage() {
         )}
         <button type="submit">Register</button>
       </form>
+
+      <div>
+        {formResponse && (
+          <p
+            className={`text-sm mt-2 ${formResponse.success ? "text-green-400" : "text-red-400"}`}
+          >
+            {formResponse.message}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

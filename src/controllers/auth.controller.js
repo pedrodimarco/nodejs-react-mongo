@@ -28,7 +28,13 @@ export const register = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("error", error);
+
+    if (error.code === 11000) {
+      return res.status(409).json({ message: "Ese email ya está registrado" });
+    }
+
+    return res.status(500).json({ message: error.message });
   }
 };
 
