@@ -5,12 +5,11 @@ import { createAccesToken } from "../libs/jwt.js";
 export const register = async (req, res) => {
   const { username, email, password } = req.body;
 
-  const passwordHash = await bcrypt.hash(password, 10);
-
   try {
+    const passwordHash = await bcrypt.hash(password, 10);
     const newUser = new User({
-      username: username,
-      email: email,
+      username,
+      email,
       password: passwordHash,
     });
 
@@ -28,13 +27,15 @@ export const register = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("error", error);
+    console.error("Error registering user:", error);
 
-    if (error.code === 11000) {
+    if (error?.code === 11000) {
       return res.status(409).json({ message: "Ese email ya está registrado" });
     }
 
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      message: "No se pudo completar el registro. Intentá de nuevo.",
+    });
   }
 };
 
@@ -45,12 +46,12 @@ export const login = async (req, res) => {
     const userFound = await User.findOne({ email });
 
     //Si no encuentra el usuario corta le ejecución
-    if (!userFound) return res.status(400).json({ message: "User not found" });
+    if (!userFound) return res.status(401).json({ message: "User not found" });
 
     const isMatch = await bcrypt.compare(password, userFound.password);
 
     if (!isMatch)
-      return res.status(400).json({ message: "Incorrect password" });
+      return res.status(401).json({ message: "Incorrect password" });
 
     const token = await createAccesToken({ id: userFound._id });
 
@@ -65,7 +66,10 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error logging in user:", error);
+    return res.status(500).json({
+      message: "No se pudo completar el login. Intentá de nuevo.",
+    });
   }
 };
 
@@ -86,6 +90,4 @@ export const profile = async (req, res) => {
     username: userFound.username,
     email: userFound.email,
   });
-  console.log(req.user);
-  res.send("profile");
 };
